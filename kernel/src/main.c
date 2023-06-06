@@ -51,7 +51,8 @@ void reload_gdt()
     gdtp.size = bsp_gdt_size - 1;
     gdtp.gdt_vaddr = (ul)phys_2_virt((ul)&GDT_Table);
 
-    asm volatile("lgdt (%0)   \n\t" ::"r"(&gdtp) : "memory");
+    asm volatile("lgdt (%0)   \n\t" ::"r"(&gdtp)
+                 : "memory");
 }
 
 void reload_idt()
@@ -62,7 +63,8 @@ void reload_idt()
     // kdebug("gdtvaddr=%#018lx", p.gdt_vaddr);
     // kdebug("gdt size=%d", p.size);
 
-    asm volatile("lidt (%0)   \n\t" ::"r"(&idtp) : "memory");
+    asm volatile("lidt (%0)   \n\t" ::"r"(&idtp)
+                 : "memory");
 }
 
 // 初始化系统各模块
@@ -70,7 +72,7 @@ void system_initialize()
 {
     c_uart_init(COM1, 115200);
     video_init();
-
+    scm_init();
     // 重新加载gdt和idt
     ul tss_item_addr = (ul)phys_2_virt(0x7c00);
 
@@ -95,22 +97,25 @@ void system_initialize()
     // mm初始化完毕后，若不重新初始化显示驱动，将会导致错误的数据写入内存，从而造成其他模块崩溃
     // 对显示模块进行低级初始化，不启用double buffer
     io_mfence();
-    video_init();
-    scm_init();
+
+    rs_textui_init();
     scm_reinit();
     io_mfence();
-    rs_textui_init();
+
     io_mfence();
-    
+
     kinfo("333333333");
-    
+
     kinfo("333333333");
-    kinfo("333333333");kinfo("333333333");kinfo("333333333");kinfo("333333333");
     kinfo("333333333");
-    while(1);
     kinfo("333333333");
-    
-    
+    kinfo("333333333");
+    kinfo("333333333");
+    kinfo("333333333");
+    while (1)
+        ;
+    kinfo("333333333");
+
     // =========== 重新设置initial_tss[0]的ist
     uchar *ptr = (uchar *)kzalloc(STACK_SIZE, 0) + STACK_SIZE;
     ((struct process_control_block *)(ptr - STACK_SIZE))->cpu_id = 0;
@@ -151,7 +156,7 @@ void system_initialize()
 
     vfs_init();
     rs_tty_init();
-    
+
     cpu_init();
     ps2_keyboard_init();
     // tty_init();
@@ -171,7 +176,7 @@ void system_initialize()
     io_mfence();
     // current_pcb->preempt_count = 0;
     // kdebug("cpu_get_core_crysral_freq()=%ld", cpu_get_core_crysral_freq());
-    
+
     process_init();
     // 启用double buffer
     // scm_enable_double_buffer();  // 因为时序问题, 该函数调用被移到 initial_kernel_thread
@@ -184,7 +189,7 @@ void system_initialize()
 
     apic_timer_init();
     io_mfence();
-   
+
     // 这里不能删除，否则在O1会报错
     // while (1)
     //     pause();

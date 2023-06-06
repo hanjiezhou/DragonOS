@@ -403,7 +403,6 @@ impl TextuiWindow {
 
             // 加入光标后，因为会识别光标，所以需超过该行最大字符数才能创建新行
             if s_vline + 1 > self.chars_per_line {
-
                 self.textui_new_line();
             }
         } else {
@@ -454,7 +453,7 @@ impl TextuiWindow {
                     space_to_print -= 1;
                 }
             }
-        }  
+        }
         // else if character == b' ' {
         //     self.ture_textui_putchar_window(b' ', frcolor as usize, bkcolor as usize)?;
         // }
@@ -626,9 +625,10 @@ impl ScmUiFramework for TextUiFramework {
         return Ok(self.metadata.clone());
     }
 }
+
 //textui 未初始化时直接向缓冲区写，不使用虚拟行
-pub static mut NO_INIT_OPERATIONS_LINE: i16 = 0;
-pub static mut NO_INIT_OPERATIONS_CHAR: i16 = 0;
+static mut NO_INIT_OPERATIONS_LINE: i16 = 0;
+static mut NO_INIT_OPERATIONS_CHAR: i16 = 0;
 
 pub fn no_init_textui_putchar_window(
     character: u8,
